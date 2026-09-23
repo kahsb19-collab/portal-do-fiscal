@@ -2273,3 +2273,45 @@ document.getElementById('btnResumoDesviosAbertos').addEventListener('click', ()=
     return;
   }
 
+  const subject = `Resumo de desvios em aberto — ${site} (${desvios.length})`;
+  const body =
+`Prezado(a) Preposto(a),
+
+RESUMO — Desvios em aberto | ${complexo} — ${site}
+------------------------------------
+${desvios.join('\n\n')}
+------------------------------------
+
+Pedimos a gentileza de regularizar o quanto antes, respeitando os prazos indicados, conforme o Anexo 02 (SLA) do contrato.
+
+Atenciosamente,`;
+
+  window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+});
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+initComplexoSelect();
+initProcessoPicker();
+initHistFilters();
+initEmailContratada();
+document.getElementById('pdfData').value = new Date().toISOString().slice(0,10);
+renderChecklistForm();
+renderHome();
+document.getElementById('mobileSaveBar').style.display = 'none';
+</script>
+</body>
+</html>
