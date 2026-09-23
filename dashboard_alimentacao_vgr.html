@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007c7a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Portal do Fiscal — Alimentação · Sapore Vargem Grande/Paraopeba</title>
+<style>
+:root{
+  --teal-900:#00323f;
+  --teal-800:#00485e;
+  --teal-700:#0a5a70;
+  --vale-oficial:#007c7a;
+  --teal-100:#e4eef0;
+  --gold:#ffc72c;
+  --gold-dark:#d9a600;
+  --bg:#f2f5f6;
+  --card:#ffffff;
+  --text:#152426;
+  --muted:#5f7377;
+  --border:#dde6e8;
+  --ok:#2e9e5b;
+  --ok-bg:#e6f5ec;
+  --warn:#c8860a;
+  --warn-bg:#fdf1dc;
+  --bad:#c23b3b;
+  --bad-bg:#fbe9e9;
+  --sap-orange:#e2571c;
+  --sap-orange-bg:#fdece2;
+  --radius:10px;
+  font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--bg);color:var(--text);}
+header{
+  background:linear-gradient(120deg,var(--vale-oficial),#00504e 60%,var(--sap-orange) 145%);
+  color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+  border-bottom:4px solid var(--gold);
+}
+header .brand{display:flex;align-items:center;gap:14px;animation:brandIn .5s ease both;}
+header .brand .mark{
+  width:44px;height:auto;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));
+}
+header .brand .mark img{width:100%;height:auto;display:block;}
+header .brand-text{display:flex;flex-direction:column;}
+header h1{
+  font-size:22px;margin:0;font-weight:800;letter-spacing:.2px;line-height:1.15;
+  color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.12);
+}
+header .tagline{
+  margin:1px 0 4px;font-size:13px;font-weight:700;color:var(--gold);
+  letter-spacing:.3px;
+}
+header .subdesc{margin:0;font-size:11.5px;color:#ffe4d6;line-height:1.4;}
+@keyframes brandIn{
+  from{opacity:0;transform:translateY(-6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.top-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.top-filters select,.top-filters input{
+  background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35);
+  border-radius:8px;padding:7px 10px;font-size:13px;
+}
+.top-filters input::placeholder{color:#ffe9df;}
+.top-filters select option{color:#111;}
+
+nav.tabs{
+  display:flex;gap:4px;background:#fff;padding:0 20px;border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+nav.tabs button{
+  border:none;background:transparent;padding:10px 15px;font-size:13px;font-weight:600;color:var(--muted);
+  cursor:pointer;border-radius:8px 8px 0 0;border-bottom:3px solid transparent;
+  transition:color .18s ease,background-color .18s ease,border-color .18s ease;
+}
+nav.tabs button:hover{color:var(--teal-800);background:var(--teal-100);}
+nav.tabs button.active{color:var(--teal-900);border-bottom:3px solid var(--sap-orange);background:var(--teal-100);}
+
+.view{display:none;}
+.view.active{display:block;animation:viewIn .28s ease both;}
+@keyframes viewIn{
+  from{opacity:0;transform:translateY(6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+main{max-width:980px;margin:0 auto;padding:22px 24px 60px;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,40,50,.04);transition:box-shadow .2s ease,transform .2s ease;}
+
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:680px){.home-grid{grid-template-columns:1fr 1fr;gap:10px;}}
+.home-card{
+  display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;
+  background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px 16px;
+  cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,50,63,.06);
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.home-card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,50,63,.1);}
+.home-card:active{transform:scale(0.96);}
+.home-card-icon{
+  width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:4px;
+}
+.home-card-title{font-size:14px;font-weight:800;color:var(--teal-900);}
+.home-card-desc{font-size:11.5px;color:var(--muted);line-height:1.4;}
+.home-card-stat{font-size:11px;font-weight:700;color:var(--teal-800);margin-top:6px;}
+.home-card-stat.alerta{color:var(--bad);}
+.home-hero{text-align:center;padding:22px 18px;}
+.home-hero .saud{font-size:12.5px;color:var(--muted);}
+.home-hero .pergunta{font-size:17px;font-weight:800;color:var(--teal-900);margin-top:2px;}
+
+.card h2{margin:0 0 4px;font-size:16px;color:var(--teal-900);}
+.card .sub{font-size:12.5px;color:var(--muted);margin-bottom:14px;}
+.grid{display:grid;gap:14px;}
+.grid.cols-4{grid-template-columns:repeat(4,1fr);}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:900px){.grid.cols-4,.grid.cols-3,.grid.cols-2{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.grid.cols-4,.grid.cols-3,.grid.cols-2{grid-template-columns:1fr;}}
+
+label{display:block;font-size:12px;font-weight:700;color:var(--teal-900);margin-bottom:5px;}
+input[type=text],input[type=date],input[type=number],input[type=month],select,textarea{
+  width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;
+  font-family:inherit;color:var(--text);background:#fff;
+}
+textarea{resize:vertical;min-height:60px;}
+.field{margin-bottom:12px;}
+
+.restaurante-picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.restaurante-picker button{
+  border:1.5px solid var(--border);background:#fff;padding:10px 16px;border-radius:9px;cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--teal-900);
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease;
+}
+.restaurante-picker button.active{background:var(--sap-orange);border-color:var(--sap-orange);color:#fff;}
+
+.bloco{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;background:#fbfdfd;}
+.bloco-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.bloco-head h3{margin:0;font-size:14px;color:var(--teal-900);}
+.bloco-head .peso{font-size:11.5px;font-weight:800;color:var(--sap-orange);background:var(--sap-orange-bg);padding:2px 9px;border-radius:20px;}
+.bloco-resultado{font-size:12px;font-weight:700;color:var(--teal-800);}
+
+.item-row{padding:11px 0;border-bottom:1px solid var(--border);}
+.item-row:last-child{border-bottom:none;}
+.item-row .desc{font-size:13px;line-height:1.5;margin-bottom:8px;}
+.item-row .evid{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
+.conforme-toggle{display:flex;gap:8px;}
+.conforme-toggle button{
+  flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:12.5px;
+  font-weight:700;cursor:pointer;color:var(--muted);transition:all .15s ease;
+}
+.conforme-toggle button.sel-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);}
+.conforme-toggle button.sel-bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad);}
+
+.kpi-row{padding:13px 0;border-bottom:1px solid var(--border);}
+.kpi-row:last-child{border-bottom:none;}
+.kpi-row .kpi-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
+.kpi-row .kpi-nome{font-size:13.5px;font-weight:700;color:var(--teal-900);}
+.kpi-row .kpi-peso{font-size:11px;font-weight:800;color:var(--sap-orange);}
+.kpi-row .kpi-desc{font-size:11.5px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+
+.ssma-row{padding:12px 0;border-bottom:1px solid var(--border);}
+.ssma-row:last-child{border-bottom:none;}
+.ssma-row .ssma-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.ssma-row .ssma-nome{font-size:13.5px;font-weight:700;color:var(--teal-900);}
+.ssma-row .ssma-peso{font-size:11px;font-weight:800;color:var(--sap-orange);}
+.ssma-row .ssma-desc{font-size:11.5px;color:var(--muted);margin-bottom:8px;line-height:1.5;}
+.ssma-scale{display:flex;gap:6px;flex-wrap:wrap;}
+.ssma-scale button{
+  flex:1;min-width:56px;padding:8px 4px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+  font-size:11.5px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .15s ease;
+}
+.ssma-scale button.sel{background:var(--teal-800);border-color:var(--teal-800);color:#fff;}
+.ssma-scale button.sel.zero{background:var(--bad);border-color:var(--bad);}
+.ssma-scale button.sel.parcial{background:var(--warn);border-color:var(--warn);}
+.ssma-scale button.sel.na{background:var(--muted);border-color:var(--muted);}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
+.badge.ok{background:var(--ok-bg);color:var(--ok);}
+.badge.warn{background:var(--warn-bg);color:var(--warn);}
+.badge.bad{background:var(--bad-bg);color:var(--bad);}
+.badge.neutral{background:var(--teal-100);color:var(--teal-800);}
+
+.btn{
+  background:var(--teal-800);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13.5px;
+  font-weight:700;cursor:pointer;transition:background-color .16s ease,transform .12s ease,box-shadow .16s ease;
+}
+.btn:hover{background:var(--teal-900);transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,50,63,.15);}
+.btn:active{transform:translateY(0);box-shadow:none;}
+.btn.gold{background:var(--sap-orange);color:#fff;}
+.btn.gold:hover{background:#c8460f;}
+.btn.ghost{background:#fff;color:var(--teal-800);border:1.5px solid var(--teal-800);}
+.btn.danger{background:#fff;color:var(--bad);border:1.5px solid var(--bad);}
+.btn.small{padding:6px 11px;font-size:12px;}
+
+.actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.summary-strip{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.stat{
+  flex:1;min-width:120px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;
+}
+.stat .n{font-size:24px;font-weight:800;color:var(--teal-900);}
+.stat .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-top:2px;}
+.progress{height:8px;background:var(--teal-100);border-radius:6px;overflow:hidden;margin-top:8px;}
+.progress > div{height:100%;background:var(--sap-orange);}
+
+.kv{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px dashed var(--border);}
+.kv:last-child{border-bottom:none;}
+.kv b{color:var(--text);}
+.empty{padding:30px;text-align:center;color:var(--muted);font-size:13px;}
+.footer-note{font-size:11.5px;color:var(--muted);margin-top:26px;line-height:1.6;}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal-900);color:#fff;
+  padding:12px 20px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2);
+  opacity:0;pointer-events:none;transition:all .25s ease;z-index:50;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.filters-row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px;}
+.filters-row .field{margin-bottom:0;min-width:160px;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+.dot.ok{background:var(--ok);}
+.dot.warn{background:var(--warn);}
+.dot.bad{background:var(--bad);}
+
+table.responsive-stack{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.responsive-stack th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;padding:8px 10px;border-bottom:2px solid var(--border);}
+table.responsive-stack td{padding:9px 10px;border-bottom:1px solid var(--border);}
+
+@media(max-width:680px){
+  header{flex-direction:column;align-items:flex-start;padding:14px 16px;}
+  header h1{font-size:18px;}
+  header .tagline{font-size:11.5px;}
+  header .subdesc{font-size:10.5px;}
+  .top-filters{width:100%;}
+  .top-filters select,.top-filters input{flex:1 1 100%;width:100%;min-height:44px;font-size:15px;}
+
+  nav.tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding:8px 12px 0;}
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button{flex:0 0 auto;padding:11px 14px;font-size:13px;}
+
+  main{padding:14px 12px 90px;}
+  .card{padding:14px;border-radius:12px;}
+
+  .grid.cols-4,.grid.cols-3,.grid.cols-2{grid-template-columns:1fr;}
+  .filters-row{flex-direction:column;align-items:stretch;}
+  .filters-row .field{width:100%;min-width:0;}
+
+  input[type=text],input[type=date],input[type=number],input[type=month],select,textarea{
+    min-height:44px;font-size:16px;padding:10px 12px;
+  }
+  .btn{min-height:46px;padding:12px 18px;font-size:14.5px;width:100%;}
+  .actions-row{flex-direction:column;}
+  .actions-row .btn{width:100%;}
+  .restaurante-picker button{flex:1 1 calc(50% - 8px);min-height:46px;}
+  .conforme-toggle button{min-height:44px;}
+  .ssma-scale button{min-height:40px;}
+
+  table.responsive-stack thead{display:none;}
+  table.responsive-stack, table.responsive-stack tbody, table.responsive-stack tr, table.responsive-stack td{
+    display:block; width:100%;
+  }
+  table.responsive-stack tr{
+    border:1px solid var(--border);border-radius:12px;margin-bottom:12px;padding:10px 12px;background:#fff;
+  }
+  table.responsive-stack td{border-bottom:none;padding:4px 0;display:flex;justify-content:space-between;gap:10px;}
+  table.responsive-stack td::before{content:attr(data-label);font-weight:700;color:var(--muted);font-size:11px;text-transform:uppercase;}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="mark"><img src="data:image/png;base64,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" alt="Vale"></div>
+    <div class="brand-text">
+      <h1>Portal do Fiscal</h1>
+      <p class="tagline">Alimentação · Sapore Vargem Grande / Paraopeba</p>
+      <p class="subdesc">Índice de Qualidade (Iq) · SLA/ANS</p>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button data-view="viewHome" class="active">Início</button>
+  <button data-view="viewQualidade">Checklist Qualidade</button>
+  <button data-view="viewSLA">SLA Alimentação</button>
+  <button data-view="viewHistorico">Histórico</button>
+</nav>
+
+<main>
+
+  <!-- ===================== INÍCIO ===================== -->
+  <section id="viewHome" class="view active">
+    <div class="card home-hero">
+      <div class="saud">Bem-vindo de volta</div>
+      <div class="pergunta">O que você quer fazer?</div>
+    </div>
+
+    <div class="restaurante-picker" id="homeRestPicker"></div>
+
+    <div class="home-grid">
+      <button class="home-card" data-view="viewQualidade">
+        <div class="home-card-icon" style="background:linear-gradient(150deg,#00a19c,#00504e);color:#fff;">📋</div>
+        <div class="home-card-title">Checklist Qualidade</div>
+        <div class="home-card-desc">Índice de Qualidade (Iq) — mensal</div>
+        <div class="home-card-stat" id="statQualidade">—</div>
+      </button>
+      <button class="home-card" data-view="viewSLA">
+        <div class="home-card-icon" style="background:linear-gradient(150deg,var(--gold),var(--gold-dark));color:var(--teal-900);">📊</div>
+        <div class="home-card-title">SLA Alimentação</div>
+        <div class="home-card-desc">Acordo de Nível de Serviço (ANS)</div>
+        <div class="home-card-stat" id="statSLA">—</div>
+      </button>
+      <button class="home-card" data-view="viewHistorico">
+        <div class="home-card-icon" style="background:linear-gradient(150deg,#5a6b6d,#33474a);color:#fff;">🗂️</div>
+        <div class="home-card-title">Histórico</div>
+        <div class="home-card-desc">Avaliações já registradas</div>
+        <div class="home-card-stat" id="statHistorico">—</div>
+      </button>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h2>Sobre este painel</h2>
+      <div class="sub">Baseado no Contrato de Fornecimento de Alimentação Industrial — Vale S.A. e Sapore S.A. (Minas Gerais — Complexo Vargem Grande e Complexo Paraopeba)</div>
+      <div class="kv"><span>Checklist Qualidade (Iq)</span><b>Iq = 0,4·QS + 0,1·GP + 0,2·SSMA + 0,2·QSA + 0,1·5S — mensal</b></div>
+      <div class="kv"><span>SLA Alimentação (ANS)</span><b>9 indicadores ponderados — gera deflator na fatura</b></div>
+      <div class="kv"><span>SSMA</span><b>avaliado dentro do próprio Checklist de Qualidade (bloco 3) e como indicador do SLA — este contrato não tem formulário SSMA separado</b></div>
+    </div>
+  </section>
+
+  <!-- ===================== CHECKLIST QUALIDADE (Iq) ===================== -->
+  <section id="viewQualidade" class="view">
+    <div class="card">
+      <h2>Checklist Mensal de Qualidade</h2>
+      <div class="sub">Índice de Qualidade (Iq) — avaliação mensal, conforme Anexo III do contrato. Iq = 0,5·QS + 0,15·GP + 0,25·QSA + 0,1·5S</div>
+
+      <div class="restaurante-picker" id="qRestPicker"></div>
+
+      <div class="grid cols-2">
+        <div class="field">
+          <label>Mês de referência</label>
+          <input type="month" id="qMes">
+        </div>
+        <div class="field">
+          <label>Avaliador (fiscal)</label>
+          <input type="text" id="qAvaliador" placeholder="Seu nome">
+        </div>
+      </div>
+
+      <div id="qBlocos"></div>
+
+      <div class="card" style="background:var(--teal-100);border:none;margin-top:6px;">
+        <div class="summary-strip" style="margin-bottom:0;">
+          <div class="stat"><div class="n" id="qIqValor">—</div><div class="l">Índice de Qualidade (Iq)</div></div>
+          <div class="stat"><div class="n" id="qClassificacao">—</div><div class="l">Classificação</div></div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn gold" id="btnSalvarQualidade">Salvar checklist do mês</button>
+        <button class="btn ghost" id="btnLimparQualidade">Limpar formulário</button>
+      </div>
+
+      <div class="card" style="background:var(--bg);margin-top:16px;">
+        <h2 style="font-size:14px;">Compartilhar com a Contratada</h2>
+        <div class="field">
+          <label>E-mail da Contratada (Sapore) para este restaurante</label>
+          <input type="text" id="qEmailContratada" placeholder="contato@sapore.com.br">
+        </div>
+        <div class="actions-row" style="margin-top:0;">
+          <button class="btn ghost" id="btnPdfQualidade">Baixar PDF do painel</button>
+          <button class="btn ghost" id="btnEmailQualidade">Enviar e-mail para Contratada</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SLA ALIMENTAÇÃO (ANS) ===================== -->
+  <section id="viewSLA" class="view">
+    <div class="card">
+      <h2>SLA Alimentação — Acordo de Nível de Serviço (ANS)</h2>
+      <div class="sub">Anexo II do contrato. Cada indicador tem uma nota de 0 a 4 conforme a faixa atingida; o resultado ponderado define o deflator aplicado à fatura.</div>
+
+      <div class="restaurante-picker" id="slaRestPicker"></div>
+
+      <div class="grid cols-2">
+        <div class="field">
+          <label>Mês de referência</label>
+          <input type="month" id="slaMes">
+        </div>
+        <div class="field">
+          <label>Valor da medição do mês (R$)</label>
+          <input type="number" id="slaValorMedicao" placeholder="0,00" step="0.01">
+        </div>
+      </div>
+
+      <div id="slaKpis"></div>
+
+      <div class="card" style="background:var(--teal-100);border:none;margin-top:6px;">
+        <div class="summary-strip" style="margin-bottom:0;">
+          <div class="stat"><div class="n" id="slaPercentual">—</div><div class="l">Resultado ponderado</div></div>
+          <div class="stat"><div class="n" id="slaDeflator">—</div><div class="l">Deflator (Gestão de Consequência)</div></div>
+          <div class="stat"><div class="n" id="slaValorDeflator">—</div><div class="l">Valor do deflator (R$)</div></div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn gold" id="btnSalvarSLA">Salvar SLA do mês</button>
+        <button class="btn ghost" id="btnLimparSLA">Limpar formulário</button>
+      </div>
+
+      <div class="card" style="background:var(--bg);margin-top:16px;">
+        <h2 style="font-size:14px;">Compartilhar com a Contratada</h2>
+        <div class="field">
+          <label>E-mail da Contratada (Sapore) para este restaurante</label>
+          <input type="text" id="slaEmailContratada" placeholder="contato@sapore.com.br">
+        </div>
+        <div class="actions-row" style="margin-top:0;">
+          <button class="btn ghost" id="btnPdfSLA">Baixar PDF do painel</button>
+          <button class="btn ghost" id="btnEmailSLA">Enviar e-mail para Contratada</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================== HISTÓRICO ===================== -->
+  <section id="viewHistorico" class="view">
+    <div class="card">
+      <h2>Histórico de avaliações</h2>
+      <div class="sub">Todas as avaliações salvas neste aparelho, por tipo, restaurante e mês.</div>
+
+      <div class="filters-row">
+        <div class="field">
+          <label>Tipo</label>
+          <select id="histTipo">
+            <option value="todos">Todos</option>
+            <option value="qualidade">Checklist Qualidade (Iq)</option>
+            <option value="sla">SLA Alimentação</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Restaurante</label>
+          <select id="histRestaurante">
+            <option value="todos">Todos</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Exportar</label>
+          <div style="display:flex;gap:8px;">
+            <button class="btn ghost small" id="btnExportarCSV">Exportar CSV</button>
+            <button class="btn ghost small" id="btnPdfHistorico">Baixar PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="histLista"></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DADOS DO CONTRATO — Sapore Vargem Grande/Paraopeba (Minuta BID MG)
+   ============================================================ */
+const RESTAURANTES = ['Vargem Grande','Pico','Horizontes','Tamanduá','Mutuca','Jangada','Fábrica'];
+const RESTAURANTE_COMPLEXO = {
+  'Vargem Grande':'Complexo Vargem Grande', 'Pico':'Complexo Vargem Grande',
+  'Horizontes':'Complexo Vargem Grande', 'Tamanduá':'Complexo Vargem Grande',
+  'Mutuca':'Complexo Paraopeba', 'Jangada':'Complexo Paraopeba', 'Fábrica':'Complexo Paraopeba'
+};
+
+const QUALIDADE_BLOCOS = [
+  { chave:'QS', nome:'1. Qualidade da Prestação do Serviço', peso:0.40, itens:[
+    'As preparações foram realizadas com qualidade, utilizando o receituário aprovado pela VALE.',
+    'Não há produto fora ou diferente da Especificação Técnica presente no restaurante/refeitório.',
+    'A quantidade de trocas de itens do cardápio aceitas pelo fiscal Vale não foi superior a 4 no mês.',
+    'Os horários de atendimento foram cumpridos conforme pré-estabelecido em contrato.',
+    'Há pessoas exclusivas para limpeza (mesas/balcões, piso, pia de lavagem de mãos, retirada de lixo) durante o atendimento.',
+    'Não houve parada de rampa (atraso/não reposição por mais de 3 min) mais de 4 vezes no mês.'
+  ]},
+  { chave:'GP', nome:'2. Gestão de Pessoas', peso:0.10, itens:[
+    'Ocorreu reunião de performance mensal com a equipe Vale (indicadores, plano de ação, ações corretivas e de melhoria).',
+    'As reuniões de gestão da rotina operacional foram realizadas.'
+  ]},
+  { chave:'SSMA', nome:'3. Saúde, Segurança e Meio Ambiente', peso:0.20, itens:[
+    'Os EPIs estão limpos e em bom estado de conservação.',
+    'Os produtos de limpeza estão adequadamente armazenados e identificados de forma correta.',
+    'Os vestiários e armários da Contratada estão limpos, em bom estado de conservação e identificados corretamente.',
+    'A segregação de resíduos gerados e tratados dentro da cozinha está correta, de acordo com a programação de Gestão de Resíduos da Vale.',
+    'Os pontos de impactos ambientais estão claros e visíveis na área (LAIA), na revisão atual do documento.',
+    'Os procedimentos de segurança/meio ambiente/qualidade estão sendo cumpridos pelos colaboradores.'
+  ]},
+  { chave:'QSA', nome:'4. Qualidade e Segurança Alimentar', peso:0.20, itens:[
+    'Os colaboradores estão devidamente uniformizados conforme cargo/função.',
+    'Os dispensers estão abastecidos com papel não reciclado e sabonete bactericida (entrada, recebimento, manipulação, cocção, vestiários).',
+    'As caixas plásticas de armazenamento de alimentos estão limpas e em bom estado de conservação.',
+    'O Manual de Boas Práticas está completo e preenchido conforme orientação da Qualidade/Segurança Alimentar.',
+    'Os termômetros estão limpos, calibrados e disponíveis para a equipe.',
+    'O check list de higienização dos veículos está preenchido e disponível para fiscalização.'
+  ]},
+  { chave:'S5', nome:'5. 5S', peso:0.10, itens:[
+    'As áreas estão devidamente limpas e organizadas (pisos, paredes, bancadas).',
+    'Os utensílios e equipamentos estão em bom estado de conservação.',
+    'Os utensílios e equipamentos estão limpos e organizados.',
+    'Os resíduos estão segregados corretamente conforme Guia de Segregação de Resíduos da Vale.'
+  ]}
+];
+
+const SLA_KPIS = [
+  { chave:'PS', nome:'Pesquisa de Satisfação (PS)', peso:15,
+    desc:'Total de pesquisas de satisfação com resultado satisfatório / total de pesquisas respondidas.',
+    faixas:[{nota:0,label:'< 81,9%'},{nota:1,label:'82% a 86,9%'},{nota:2,label:'87% a 91,9%'},{nota:3,label:'92% a 94,99%'},{nota:4,label:'≥ 95%'}] },
+  { chave:'SSMA_GT', nome:'Cumprimento de requisitos de SSMA (Gestão de Terceiros)', peso:10,
+    desc:'Resultado da avaliação de performance em SSMA (bloco 3 do Checklist Mensal de Qualidade deste painel).',
+    faixas:[{nota:0,label:'Desempenho inexistente (0–19,9%)'},{nota:1,label:'Insuficiente (20–39,9%)'},{nota:2,label:'Fraco (40–69,9%)'},{nota:3,label:'Moderado (70–89,9%)'},{nota:4,label:'Forte (90–100%)'}] },
+  { chave:'EQ', nome:'Manutenção Preventiva de Equipamentos (EQ)', peso:15,
+    desc:'Total de manutenção preventiva realizada / total programado no plano de 52 semanas (SAP).',
+    faixas:[{nota:0,label:'< 74,9%'},{nota:1,label:'75% a 79,9%'},{nota:2,label:'80% a 84,9%'},{nota:3,label:'85% a 89,99%'},{nota:4,label:'≥ 90%'}] },
+  { chave:'FTE', nome:'Disponibilidade de Mão de Obra Mensal (FTE)', peso:10,
+    desc:'Total de pessoas efetivamente ativas / total de pessoas acordado (RFQ), via folha de ponto.',
+    faixas:[{nota:0,label:'< 85%'},{nota:1,label:'86% a 87%'},{nota:2,label:'88% a 89%'},{nota:3,label:'90% a 91%'},{nota:4,label:'≥ 92%'}] },
+  { chave:'CQ', nome:'Check List Qualidade, Saúde e Segurança (CQ)', peso:15,
+    desc:'Total de itens verificados com resultado satisfatório / total de itens verificados.',
+    faixas:[{nota:0,label:'< 50%'},{nota:1,label:'50% a 59,9%'},{nota:2,label:'60% a 69,9%'},{nota:3,label:'70% a 79,9%'},{nota:4,label:'≥ 80%'}] },
+  { chave:'MP', nome:'Melhoria de Processos', peso:10,
+    desc:'Apresentar, validar e aplicar melhorias de processo sem aumento de custo (produção, transporte, segurança, kaizens, atendimento, VPS etc.), bimestralmente.',
+    faixas:[{nota:0,label:'Nenhuma melhoria apresentada'},{nota:4,label:'≥ 1 melhoria validada e aplicada'}] },
+  { chave:'CE', nome:'Corpo Estranho', peso:5,
+    desc:'Larvas, insetos, cabelo, pedras ou qualquer outro corpo estranho na alimentação.',
+    faixas:[{nota:0,label:'Houve ocorrência (> 0)'},{nota:4,label:'Sem ocorrência'}] },
+  { chave:'AM', nome:'Análise Microbiológica (AM)', peso:10,
+    desc:'Total de análises com resultado satisfatório / total de análises realizadas.',
+    faixas:[{nota:0,label:'< 80%'},{nota:1,label:'80% a 84,9%'},{nota:2,label:'85% a 89,9%'},{nota:3,label:'90% a 99,9%'},{nota:4,label:'100%'}] },
+  { chave:'RI', nome:'Desperdício Alimentar — Resto Ingestão (RI)', peso:10,
+    desc:'Total de sobra de resto ingestão / total de pessoas servidas.',
+    faixas:[{nota:0,label:'Acima de 31g'},{nota:1,label:'29g a 31g'},{nota:2,label:'27g a 29g'},{nota:3,label:'25,1g a 27,1g'},{nota:4,label:'≤ 25g'}] }
+];
+
+function calcDeflator(pct){
+  if(pct<=60) return 2.5;
+  if(pct<=65) return 2.0;
+  if(pct<=70) return 1.5;
+  if(pct<=80) return 1.0;
+  return 0.0;
+}
+
+/* ============================================================
+   ESTADO E PERSISTÊNCIA
+   ============================================================ */
+const LS_QUALIDADE = 'alim_qualidade_v1';
+const LS_SLA = 'alim_sla_v1';
+
+function lsGet(key){ try{ return JSON.parse(localStorage.getItem(key)) || []; }catch(e){ return []; } }
+function lsSet(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+function mesAtual(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+const state = {
+  restaurante: 'Vargem Grande',
+  qualidade: {}   // {bloco: [true/false/null, ...]}
+};
+
+function initQualidadeState(){
+  state.qualidade = {};
+  QUALIDADE_BLOCOS.forEach(b=>{ state.qualidade[b.chave] = new Array(b.itens.length).fill(null); });
+}
+initQualidadeState();
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============================================================
+   NAVEGAÇÃO
+   ============================================================ */
+function switchView(viewId){
+  document.querySelectorAll('nav.tabs button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.view === viewId);
+  });
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(viewId==='viewHistorico') renderHistorico();
+  if(viewId==='viewHome') renderHomeStats();
+}
+document.querySelectorAll('[data-view]').forEach(el=>{
+  el.addEventListener('click', ()=> switchView(el.dataset.view));
+});
+
+/* ============================================================
+   SELETOR DE RESTAURANTE (compartilhado entre telas)
+   ============================================================ */
+function renderRestPickers(){
+  const containers = ['homeRestPicker','qRestPicker','slaRestPicker'];
+  containers.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = RESTAURANTES.map(r=>
+      `<button type="button" data-rest="${r}" class="${r===state.restaurante?'active':''}">${r}</button>`
+    ).join('');
+    el.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.restaurante = btn.dataset.rest;
+        renderRestPickers();
+        renderHomeStats();
+        syncEmailFields();
+      });
+    });
+  });
+}
+
+/* ============================================================
+   CHECKLIST QUALIDADE (Iq)
+   ============================================================ */
+function renderQualidadeBlocos(){
+  const wrap = document.getElementById('qBlocos');
+  wrap.innerHTML = QUALIDADE_BLOCOS.map(bloco=>`
+    <div class="bloco">
+      <div class="bloco-head">
+        <h3>${bloco.nome}</h3>
+        <span class="peso">peso ${Math.round(bloco.peso*100)}%</span>
+      </div>
+      ${bloco.itens.map((texto,idx)=>`
+        <div class="item-row">
+          <div class="desc">${texto}</div>
+          <div class="conforme-toggle" data-bloco="${bloco.chave}" data-idx="${idx}">
+            <button type="button" data-val="1">Conforme</button>
+            <button type="button" data-val="0">Não conforme</button>
+          </div>
+        </div>
+      `).join('')}
+      <div class="bloco-resultado" id="qResultado_${bloco.chave}">Itens verificados: 0 / ${bloco.itens.length}</div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('.conforme-toggle').forEach(toggle=>{
+    const bloco = toggle.dataset.bloco;
+    const idx = parseInt(toggle.dataset.idx,10);
+    toggle.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.qualidade[bloco][idx] = btn.dataset.val === '1';
+        renderQualidadeBotoes(toggle, state.qualidade[bloco][idx]);
+        calcQualidade();
+      });
+    });
+  });
+  calcQualidade();
+}
+function renderQualidadeBotoes(toggle, val){
+  const btns = toggle.querySelectorAll('button');
+  btns[0].classList.toggle('sel-ok', val===true);
+  btns[1].classList.toggle('sel-bad', val===false);
+}
+
+function calcQualidade(){
+  let iq = 0;
+  let algumRespondido = false;
+  QUALIDADE_BLOCOS.forEach(bloco=>{
+    const respostas = state.qualidade[bloco.chave];
+    const verificados = respostas.filter(v=>v!==null).length;
+    const conformes = respostas.filter(v=>v===true).length;
+    const pct = verificados>0 ? (conformes/verificados*100) : 0;
+    if(verificados>0) algumRespondido = true;
+    iq += bloco.peso * pct;
+    const resEl = document.getElementById('qResultado_'+bloco.chave);
+    if(resEl){
+      resEl.textContent = `Itens verificados: ${verificados} / ${respostas.length}` + (verificados>0 ? ` — ${pct.toFixed(1)}% conforme` : '');
+    }
+  });
+
+  const iqEl = document.getElementById('qIqValor');
+  const classEl = document.getElementById('qClassificacao');
+  if(!algumRespondido){
+    iqEl.textContent = '—';
+    classEl.textContent = '—';
+    classEl.className = '';
+    return iq;
+  }
+  iqEl.textContent = iq.toFixed(1) + '%';
+  let label, cls;
+  if(iq>=90){label='Excelente';cls='badge ok';}
+  else if(iq>=80){label='Bom';cls='badge ok';}
+  else if(iq>=70){label='Atenção';cls='badge warn';}
+  else {label='Crítico';cls='badge bad';}
+  classEl.textContent = label;
+  classEl.className = cls;
+  return iq;
+}
+
+document.getElementById('btnLimparQualidade').addEventListener('click', ()=>{
+  initQualidadeState();
+  renderQualidadeBlocos();
+  document.getElementById('qAvaliador').value='';
+  toast('Formulário de qualidade limpo.');
+});
+
+document.getElementById('btnSalvarQualidade').addEventListener('click', ()=>{
+  const mes = document.getElementById('qMes').value || mesAtual();
+  const avaliador = document.getElementById('qAvaliador').value.trim();
+  const iq = calcQualidade();
+  const totalVerificado = QUALIDADE_BLOCOS.every(b=> state.qualidade[b.chave].every(v=>v!==null));
+  if(!totalVerificado){
+    toast('Verifique todos os itens antes de salvar.');
+    return;
+  }
+  const registros = lsGet(LS_QUALIDADE);
+  const id = state.restaurante+'_'+mes;
+  const novo = {
+    id, restaurante: state.restaurante, mes, avaliador,
+    respostas: JSON.parse(JSON.stringify(state.qualidade)),
+    iq: Number(iq.toFixed(1)),
+    criadoEm: new Date().toISOString()
+  };
+  const idx = registros.findIndex(r=>r.id===id);
+  if(idx>=0) registros[idx]=novo; else registros.push(novo);
+  lsSet(LS_QUALIDADE, registros);
+  toast('Checklist de qualidade salvo — Iq '+novo.iq+'%');
+  renderHomeStats();
+});
+
+/* ============================================================
+   SLA ALIMENTAÇÃO (ANS)
+   ============================================================ */
+function renderSlaKpis(){
+  const wrap = document.getElementById('slaKpis');
+  wrap.innerHTML = SLA_KPIS.map((kpi,idx)=>`
+    <div class="kpi-row">
+      <div class="kpi-top">
+        <span class="kpi-nome">${kpi.nome}</span>
+        <span class="kpi-peso">peso ${kpi.peso}%</span>
+      </div>
+      <div class="kpi-desc">${kpi.desc}</div>
+      <select data-kpi="${idx}" class="sla-select">
+        <option value="">Selecione a faixa atingida…</option>
+        ${kpi.faixas.map(f=>`<option value="${f.nota}">Nota ${f.nota} — ${f.label}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('.sla-select').forEach(sel=>{
+    sel.addEventListener('change', calcSLA);
+  });
+  calcSLA();
+}
+
+function calcSLA(){
+  const selects = document.querySelectorAll('.sla-select');
+  let total = 0;
+  let algumSelecionado = false;
+  selects.forEach((sel,idx)=>{
+    const kpi = SLA_KPIS[idx];
+    if(sel.value !== ''){
+      algumSelecionado = true;
+      const nota = parseFloat(sel.value);
+      total += (nota/4) * kpi.peso;
+    }
+  });
+
+  const pctEl = document.getElementById('slaPercentual');
+  const defEl = document.getElementById('slaDeflator');
+  const valEl = document.getElementById('slaValorDeflator');
+  const valorMedicao = parseFloat(document.getElementById('slaValorMedicao').value) || 0;
+
+  if(!algumSelecionado){
+    pctEl.textContent='—'; defEl.textContent='—'; valEl.textContent='—';
+    return {percentual:0, deflator:0};
+  }
+  pctEl.textContent = total.toFixed(1)+'%';
+  const deflator = calcDeflator(total);
+  defEl.textContent = deflator.toFixed(1).replace('.',',')+'%';
+  const valorDeflator = valorMedicao * deflator/100;
+  valEl.textContent = valorDeflator.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  return {percentual: total, deflator, valorDeflator};
+}
+document.getElementById('slaValorMedicao').addEventListener('input', calcSLA);
+
+document.getElementById('btnLimparSLA').addEventListener('click', ()=>{
+  renderSlaKpis();
+  document.getElementById('slaValorMedicao').value='';
+  toast('Formulário de SLA limpo.');
+});
+
+document.getElementById('btnSalvarSLA').addEventListener('click', ()=>{
+  const mes = document.getElementById('slaMes').value || mesAtual();
+  const selects = document.querySelectorAll('.sla-select');
+  const todasPreenchidas = Array.from(selects).every(s=>s.value!=='');
+  if(!todasPreenchidas){
+    toast('Selecione a faixa de todos os indicadores antes de salvar.');
+    return;
+  }
+  const resultado = calcSLA();
+  const kpisSalvos = SLA_KPIS.map((kpi,idx)=>({chave:kpi.chave, nota:parseFloat(selects[idx].value)}));
+  const valorMedicao = parseFloat(document.getElementById('slaValorMedicao').value) || 0;
+  const registros = lsGet(LS_SLA);
+  const id = state.restaurante+'_'+mes;
+  const novo = {
+    id, restaurante: state.restaurante, mes, kpis: kpisSalvos,
+    percentual: Number(resultado.percentual.toFixed(1)),
+    deflator: resultado.deflator,
+    valorMedicao, valorDeflator: Number((valorMedicao*resultado.deflator/100).toFixed(2)),
+    criadoEm: new Date().toISOString()
+  };
+  const idx = registros.findIndex(r=>r.id===id);
+  if(idx>=0) registros[idx]=novo; else registros.push(novo);
+  lsSet(LS_SLA, registros);
+  toast('SLA Alimentação salvo — '+novo.percentual+'%');
+  renderHomeStats();
+});
+
+/* ============================================================
+   HOME — ESTATÍSTICAS
+   ============================================================ */
+function renderHomeStats(){
+  const mes = mesAtual();
+  const rest = state.restaurante;
+
+  const q = lsGet(LS_QUALIDADE).find(r=>r.restaurante===rest && r.mes===mes);
+  document.getElementById('statQualidade').textContent = q ? ('Iq deste mês: '+q.iq+'%') : 'Ainda não avaliado este mês';
+  document.getElementById('statQualidade').className = 'home-card-stat'+(q && q.iq<70 ? ' alerta':'');
+
+  const s = lsGet(LS_SLA).find(r=>r.restaurante===rest && r.mes===mes);
+  document.getElementById('statSLA').textContent = s ? ('Resultado: '+s.percentual+'% · deflator '+s.deflator.toString().replace('.',',')+'%') : 'Ainda não avaliado este mês';
+  document.getElementById('statSLA').className = 'home-card-stat'+(s && s.deflator>0 ? ' alerta':'');
+
+  const total = lsGet(LS_QUALIDADE).length + lsGet(LS_SLA).length;
+  document.getElementById('statHistorico').textContent = total + ' avaliação(ões) registrada(s)';
+}
+
+/* ============================================================
+   HISTÓRICO
+   ============================================================ */
+function obterLinhasHistoricoFiltradas(){
+  const tipo = document.getElementById('histTipo').value;
+  const rest = document.getElementById('histRestaurante').value;
+
+  let linhas = [];
+  lsGet(LS_QUALIDADE).forEach(r=> linhas.push({tipo:'Checklist Qualidade', restaurante:r.restaurante, mes:r.mes, resultado:'Iq '+r.iq+'%', criadoEm:r.criadoEm}));
+  lsGet(LS_SLA).forEach(r=> linhas.push({tipo:'SLA Alimentação', restaurante:r.restaurante, mes:r.mes, resultado:r.percentual+'% (deflator '+r.deflator.toString().replace('.',',')+'%)', criadoEm:r.criadoEm}));
+
+  if(tipo!=='todos'){
+    const map = {qualidade:'Checklist Qualidade', sla:'SLA Alimentação'};
+    linhas = linhas.filter(l=>l.tipo===map[tipo]);
+  }
+  if(rest!=='todos'){
+    linhas = linhas.filter(l=>l.restaurante===rest);
+  }
+  linhas.sort((a,b)=> b.mes.localeCompare(a.mes) || b.criadoEm.localeCompare(a.criadoEm));
+  return linhas;
+}
+
+function renderHistorico(){
+  const linhas = obterLinhasHistoricoFiltradas();
+
+  const wrap = document.getElementById('histLista');
+  if(linhas.length===0){
+    wrap.innerHTML = '<div class="empty">Nenhuma avaliação encontrada para este filtro.</div>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="responsive-stack">
+      <thead><tr><th>Tipo</th><th>Restaurante</th><th>Mês</th><th>Resultado</th></tr></thead>
+      <tbody>
+        ${linhas.map(l=>`
+          <tr>
+            <td data-label="Tipo">${l.tipo}</td>
+            <td data-label="Restaurante">${l.restaurante}</td>
+
+            <td data-label="Mês">${l.mes}</td>
+            <td data-label="Resultado"><b>${l.resultado}</b></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+document.getElementById('histTipo').addEventListener('change', renderHistorico);
+document.getElementById('histRestaurante').addEventListener('change', renderHistorico);
+
+document.getElementById('btnExportarCSV').addEventListener('click', ()=>{
+  let linhas = [['Tipo','Restaurante','Mes','Resultado','SalvoEm']];
+  lsGet(LS_QUALIDADE).forEach(r=> linhas.push(['Checklist Qualidade', r.restaurante, r.mes, 'Iq '+r.iq+'%', r.criadoEm]));
+  lsGet(LS_SLA).forEach(r=> linhas.push(['SLA Alimentacao', r.restaurante, r.mes, r.percentual+'% (deflator '+r.deflator+'%)', r.criadoEm]));
+  const csv = linhas.map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'historico_alimentacao_'+state.restaurante+'_'+mesAtual()+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('CSV exportado.');
+});
+
+/* ============================================================
+   E-MAIL DA CONTRATADA POR RESTAURANTE
+   ============================================================ */
+const LS_EMAILS_REST = 'alim_emails_restaurante_v1';
+function getEmailRestaurante(rest){
+  const map = JSON.parse(localStorage.getItem(LS_EMAILS_REST) || '{}');
+  return map[rest] || '';
+}
+function setEmailRestaurante(rest, email){
+  const map = JSON.parse(localStorage.getItem(LS_EMAILS_REST) || '{}');
+  map[rest] = email;
+  localStorage.setItem(LS_EMAILS_REST, JSON.stringify(map));
+}
+function syncEmailFields(){
+  const email = getEmailRestaurante(state.restaurante);
+  ['qEmailContratada','slaEmailContratada'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = email;
+  });
+}
+['qEmailContratada','slaEmailContratada'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el){
+    el.addEventListener('input', (e)=>{
+      setEmailRestaurante(state.restaurante, e.target.value);
+      ['qEmailContratada','slaEmailContratada'].forEach(oid=>{
+        if(oid!==id){ const o = document.getElementById(oid); if(o) o.value = e.target.value; }
+      });
+    });
+  }
+});
+
+function enviarEmailResumo(destinatario, assunto, corpo){
+  if(!destinatario){
+    toast('Informe o e-mail da Contratada antes de enviar.');
+    return false;
+  }
+  const url = 'mailto:'+encodeURIComponent(destinatario)+'?subject='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(corpo);
+  window.location.href = url;
+  return true;
+}
+
+/* ============================================================
+   PDF — HELPERS GERAIS
+   ============================================================ */
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+/* Remove/normaliza caracteres que a fonte padrão do jsPDF (Helvetica/WinAnsi)
+   não consegue renderizar corretamente (ex.: ≥ ≤ − viram símbolos errados). */
+function pdfSafe(str){
+  return String(str)
+    .replace(/≥/g,'>=')
+    .replace(/≤/g,'<=')
+    .replace(/−/g,'-')
+    .replace(/⚠/g,'');
+}
+function salvarOuAbrirPdf(doc, filename){
+  if(isIOS()){
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } else {
+    doc.save(filename);
+  }
+}
+function novoDocPdf(){
+  const { jsPDF } = window.jspdf;
+  return new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+}
+function cabecalhoPdf(doc, titulo, subtitulo){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  doc.setFillColor(0,124,122);
+  doc.rect(0,0,pageWidth,20,'F');
+  doc.setFillColor(255,199,44);
+  doc.rect(0,20,pageWidth,1,'F');
+  try{
+    const img = document.querySelector('header .mark img');
+    if(img && img.src) doc.addImage(img.src, 'PNG', 8, 4, 11, 8.1);
+  }catch(e){ /* segue sem logo se a imagem falhar */ }
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(13);
+  doc.text(pdfSafe(titulo), 24, 10);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.text(pdfSafe(subtitulo), 24, 16);
+  return 26;
+}
+function rodapePdf(doc){
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const totalPages = doc.internal.getNumberOfPages();
+  for(let p=1;p<=totalPages;p++){
+    doc.setPage(p);
+    doc.setFontSize(7.5);
+    doc.setTextColor(120,130,132);
+    doc.text('Portal do Fiscal · Alimentação Sapore Vargem Grande/Paraopeba — Página '+p+' de '+totalPages, pageWidth/2, pageHeight-6, {align:'center'});
+  }
+}
+/* Tabela com quebra de linha automática por célula (evita corte de texto)
+   e quebra de página com repetição de cabeçalho. */
+function desenharTabela(doc, startY, marginX, pageWidth, pageHeight, colunas, linhas){
+  let y = startY;
+  const headerH = 7;
+  function desenharHeaderTabela(){
+    doc.setFillColor(0,72,94);
+    doc.rect(marginX, y, colunas.reduce((s,c)=>s+c.width,0), headerH, 'F');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    doc.setTextColor(255,255,255);
+    let x = marginX;
+    colunas.forEach(col=>{
+      doc.text(pdfSafe(col.header), x+2, y+5);
+      x += col.width;
+    });
+    y += headerH;
+  }
+  desenharHeaderTabela();
+
+  linhas.forEach(linha=>{
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8);
+    const wrapped = colunas.map((col,i)=> doc.splitTextToSize(pdfSafe(linha[i]??''), col.width-4));
+    const maxLines = Math.max(...wrapped.map(w=>w.length));
+    const lineH = 3.6;
+    const rowH = Math.max(maxLines*lineH + 2.5, 7);
+
+    if(y + rowH > pageHeight - 18){
+      doc.addPage();
+      y = 14;
+      desenharHeaderTabela();
+    }
+
+    let x = marginX;
+    colunas.forEach((col,i)=>{
+      doc.setDrawColor(221,230,232);
+      doc.setLineWidth(0.1);
+      doc.rect(x, y, col.width, rowH);
+      if(col.corTexto) { const c = col.corTexto(linha[i]); doc.setTextColor(c[0],c[1],c[2]); }
+      else doc.setTextColor(21,36,38);
+      doc.setFont('helvetica', col.negrito ? 'bold':'normal');
+      doc.text(wrapped[i], x+2, y+4.2);
+      x += col.width;
+    });
+    y += rowH;
+  });
+  return y;
+}
+
+const COR_OK = [46,158,91], COR_BAD=[194,59,59], COR_WARN=[200,134,10], COR_MUTED=[150,150,150];
+
+/* ============================================================
+   PDF — CHECKLIST QUALIDADE (Iq)
+   ============================================================ */
+function gerarPdfQualidade(){
+  const doc = novoDocPdf();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 10;
+  const mes = document.getElementById('qMes').value || mesAtual();
+  let y = cabecalhoPdf(doc, 'Checklist Mensal de Qualidade — Índice de Qualidade (Iq)', 'Sapore · '+state.restaurante+' — Mês de referência: '+mes);
+
+  y += 3;
+  doc.setTextColor(60,75,77);
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica','normal');
+  doc.text(pdfSafe('Avaliador: '+(document.getElementById('qAvaliador').value.trim()||'-')), marginX, y);
+  y += 5;
+
+  const colunas = [
+    { header:'BLOCO (PESO)', width:52 },
+    { header:'ITEM VERIFICADO', width:165 },
+    { header:'RESULTADO', width:60, negrito:true, corTexto:(v)=> v==='Conforme'?COR_OK : v==='Não conforme'?COR_BAD : COR_MUTED }
+  ];
+  const linhas = [];
+  QUALIDADE_BLOCOS.forEach(bloco=>{
+    bloco.itens.forEach((texto,idx)=>{
+      const resp = state.qualidade[bloco.chave][idx];
+      const label = resp===true?'Conforme':resp===false?'Não conforme':'Não avaliado';
+      linhas.push([bloco.nome+' ('+Math.round(bloco.peso*100)+'%)', texto, label]);
+    });
+  });
+
+  y = desenharTabela(doc, y, marginX, pageWidth, pageHeight, colunas, linhas);
+
+  const iq = calcQualidade();
+  const todasRespondidas = QUALIDADE_BLOCOS.every(b=> state.qualidade[b.chave].every(v=>v!==null));
+  y += 4;
+  const boxH = todasRespondidas ? 14 : 20;
+  if(y > pageHeight - boxH - 12){ doc.addPage(); y = 14; }
+  doc.setFillColor(228,238,240);
+  doc.rect(marginX, y, pageWidth-marginX*2, boxH, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.setTextColor(0,50,63);
+  doc.text(pdfSafe('Índice de Qualidade (Iq): '+iq.toFixed(1)+'%'), marginX+4, y+9);
+  if(!todasRespondidas){
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(8.5);
+    doc.setTextColor(194,59,59);
+    doc.text('ATENÇÃO: checklist incompleto — nem todos os itens foram avaliados no momento da geração deste PDF.', marginX+4, y+16);
+  }
+
+  rodapePdf(doc);
+  return doc;
+}
+
+/* ============================================================
+   PDF — SLA ALIMENTAÇÃO (ANS)
+   ============================================================ */
+function gerarPdfSLA(){
+  const doc = novoDocPdf();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 10;
+  const mes = document.getElementById('slaMes').value || mesAtual();
+  let y = cabecalhoPdf(doc, 'SLA Alimentação — Acordo de Nível de Serviço (ANS)', 'Sapore · '+state.restaurante+' — Mês de referência: '+mes);
+
+  y += 3;
+  const colunas = [
+    { header:'INDICADOR', width:60 },
+    { header:'CRITÉRIO', width:100 },
+    { header:'PESO', width:16 },
+    { header:'FAIXA ATINGIDA', width:65 },
+    { header:'PONTOS', width:36, negrito:true }
+  ];
+  const selects = document.querySelectorAll('.sla-select');
+  const linhas = SLA_KPIS.map((kpi,idx)=>{
+    const sel = selects[idx];
+    const val = sel ? sel.value : '';
+    const faixa = val!=='' ? kpi.faixas.find(f=>String(f.nota)===val) : null;
+    const faixaTxt = faixa ? ('Nota '+faixa.nota+' — '+faixa.label) : 'Não avaliado';
+    const pontos = val!=='' ? ((parseFloat(val)/4)*kpi.peso).toFixed(1)+' / '+kpi.peso : '—';
+    return [kpi.nome, kpi.desc, kpi.peso+'%', faixaTxt, pontos];
+  });
+
+  y = desenharTabela(doc, y, marginX, pageWidth, pageHeight, colunas, linhas);
+
+  const resultado = calcSLA();
+  const todasPreenchidas = Array.from(selects).every(s=>s.value!=='');
+  y += 4;
+  if(y > pageHeight - 30){ doc.addPage(); y = 14; }
+  doc.setFillColor(228,238,240);
+  doc.rect(marginX, y, pageWidth-marginX*2, 18, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.setTextColor(0,50,63);
+  const linhaResultadoSla = 'Resultado ponderado: '+resultado.percentual.toFixed(1)+'%    |    Deflator: '+resultado.deflator.toFixed(1).replace('.',',')+'%    |    Valor do deflator: '+
+    (resultado.valorDeflator||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  doc.text(pdfSafe(linhaResultadoSla), marginX+4, y+8);
+  if(!todasPreenchidas){
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(8.5);
+    doc.setTextColor(194,59,59);
+    doc.text('ATENÇÃO: Nem todos os indicadores foram avaliados no momento da geração deste PDF.', marginX+4, y+14);
+  }
+
+  rodapePdf(doc);
+  return doc;
+}
+
+/* ============================================================
+   PDF — HISTÓRICO CONSOLIDADO
+   ============================================================ */
+function gerarPdfHistorico(){
+  const doc = novoDocPdf();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 10;
+  const tipoLabel = document.getElementById('histTipo').selectedOptions[0].text;
+  const restLabel = document.getElementById('histRestaurante').selectedOptions[0].text;
+  let y = cabecalhoPdf(doc, 'Histórico de Avaliações — Alimentação Sapore Vargem Grande/Paraopeba', 'Filtro — Tipo: '+tipoLabel+' · Restaurante: '+restLabel);
+
+  y += 3;
+  const colunas = [
+    { header:'TIPO', width:65 },
+    { header:'RESTAURANTE', width:40 },
+    { header:'MÊS', width:30 },
+    { header:'RESULTADO', width:90 },
+    { header:'SALVO EM', width:52 }
+  ];
+  const linhas = obterLinhasHistoricoFiltradas().map(l=>[
+    l.tipo, l.restaurante, l.mes, l.resultado, new Date(l.criadoEm).toLocaleString('pt-BR')
+  ]);
+
+  if(linhas.length===0){
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(10);
+    doc.setTextColor(120,130,132);
+    doc.text('Nenhuma avaliação encontrada para este filtro.', marginX, y+8);
+  } else {
+    desenharTabela(doc, y, marginX, pageWidth, pageHeight, colunas, linhas);
+  }
+
+  rodapePdf(doc);
+  return doc;
+}
+
+/* ============================================================
+   BOTÕES — PDF E E-MAIL POR ABA
+   ============================================================ */
+document.getElementById('btnPdfQualidade').addEventListener('click', ()=>{
+  const mes = document.getElementById('qMes').value || mesAtual();
+  const doc = gerarPdfQualidade();
+  salvarOuAbrirPdf(doc, 'Checklist_Qualidade_'+state.restaurante+'_'+mes+'.pdf');
+  toast('PDF do checklist gerado.');
+});
+document.getElementById('btnEmailQualidade').addEventListener('click', ()=>{
+  const email = document.getElementById('qEmailContratada').value.trim();
+  if(!email){ toast('Informe o e-mail da Contratada.'); return; }
+  const mes = document.getElementById('qMes').value || mesAtual();
+  const doc = gerarPdfQualidade();
+  salvarOuAbrirPdf(doc, 'Checklist_Qualidade_'+state.restaurante+'_'+mes+'.pdf');
+  const iq = calcQualidade();
+  const corpo = 'Olá,\n\nSegue o resultado do Checklist Mensal de Qualidade (Índice de Qualidade — Iq) referente ao restaurante '+state.restaurante+', mês '+mes+'.\n\nÍndice de Qualidade (Iq): '+iq.toFixed(1)+'%\n\nO PDF foi baixado neste dispositivo — por favor, anexe o arquivo a este e-mail antes de enviar.\n\nAtenciosamente,\nFiscal Vale';
+  enviarEmailResumo(email, 'Checklist de Qualidade — '+state.restaurante+' — '+mes, corpo);
+});
+
+document.getElementById('btnPdfSLA').addEventListener('click', ()=>{
+  const mes = document.getElementById('slaMes').value || mesAtual();
+  const doc = gerarPdfSLA();
+  salvarOuAbrirPdf(doc, 'SLA_Alimentacao_'+state.restaurante+'_'+mes+'.pdf');
+  toast('PDF do SLA gerado.');
+});
+document.getElementById('btnEmailSLA').addEventListener('click', ()=>{
+  const email = document.getElementById('slaEmailContratada').value.trim();
+  if(!email){ toast('Informe o e-mail da Contratada.'); return; }
+  const mes = document.getElementById('slaMes').value || mesAtual();
+  const doc = gerarPdfSLA();
+  salvarOuAbrirPdf(doc, 'SLA_Alimentacao_'+state.restaurante+'_'+mes+'.pdf');
+  const resultado = calcSLA();
+  const corpo = 'Olá,\n\nSegue o resultado do SLA Alimentação (ANS) referente ao restaurante '+state.restaurante+', mês '+mes+'.\n\nResultado ponderado: '+resultado.percentual.toFixed(1)+'%\nDeflator: '+resultado.deflator.toFixed(1).replace('.',',')+'%\n\nO PDF foi baixado neste dispositivo — por favor, anexe o arquivo a este e-mail antes de enviar.\n\nAtenciosamente,\nFiscal Vale';
+  enviarEmailResumo(email, 'SLA Alimentação — '+state.restaurante+' — '+mes, corpo);
+});
+
+document.getElementById('btnPdfHistorico').addEventListener('click', ()=>{
+  const doc = gerarPdfHistorico();
+  salvarOuAbrirPdf(doc, 'Historico_Alimentacao_'+mesAtual()+'.pdf');
+  toast('PDF do histórico gerado.');
+});
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+document.getElementById('qMes').value = mesAtual();
+document.getElementById('slaMes').value = mesAtual();
+
+(function popularHistRestaurante(){
+  const sel = document.getElementById('histRestaurante');
+  RESTAURANTES.forEach(r=>{
+    const opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    sel.appendChild(opt);
+  });
+})();
+
+renderRestPickers();
+renderQualidadeBlocos();
+renderSlaKpis();
+renderHomeStats();
+syncEmailFields();
+</script>
+</body>
+</html>
