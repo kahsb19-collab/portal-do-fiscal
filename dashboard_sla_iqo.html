@@ -228,6 +228,15 @@ tr:hover td{background:#fafcfc;}
 }
 .desvio-modal-footer .contagem-selecionados{font-size:12.5px;color:var(--muted);flex:1;}
 
+.processo-pdf-item-row{
+  display:flex;gap:10px;padding:11px 10px;border-bottom:1px solid var(--border);align-items:flex-start;
+}
+.processo-pdf-item-row:last-child{border-bottom:none;}
+.processo-pdf-item-row input[type=checkbox]{margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--vale-oficial);}
+.processo-pdf-item-texto{font-size:13px;line-height:1.4;}
+.processo-pdf-item-texto b{color:var(--teal-900);}
+.processo-pdf-item-texto .meta{font-size:11.5px;color:var(--muted);}
+
 .filters-row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px;}
 .filters-row .field{margin-bottom:0;min-width:160px;}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
@@ -445,6 +454,25 @@ tr:hover td{background:#fafcfc;}
         <span class="contagem-selecionados" id="desvioContagemSelecionados">0 selecionado(s)</span>
         <button class="btn ghost small" id="btnCancelarSelecaoDesvios">Cancelar</button>
         <button class="btn gold small" id="btnConfirmarExportarDesvios">Exportar selecionados</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="desvio-modal-overlay" id="processoPdfModalOverlay">
+    <div class="desvio-modal">
+      <div class="desvio-modal-header">
+        <h3>Selecionar processos para o PDF</h3>
+        <p class="sub">Nesta data há mais de um checklist. Marque quais processos entram no PDF — útil quando cada um vai para um responsável diferente.</p>
+        <div class="desvio-modal-acoes-globais">
+          <button type="button" id="btnSelecionarTodosProcessosPdf">Selecionar todos</button>
+          <button type="button" id="btnLimparSelecaoProcessosPdf">Limpar seleção</button>
+        </div>
+      </div>
+      <div class="desvio-modal-body" id="processoPdfModalBody"></div>
+      <div class="desvio-modal-footer">
+        <span class="contagem-selecionados" id="processoPdfContagemSelecionados">0 selecionado(s)</span>
+        <button class="btn ghost small" id="btnCancelarSelecaoProcessosPdf">Cancelar</button>
+        <button class="btn gold small" id="btnConfirmarSelecaoProcessosPdf">Continuar</button>
       </div>
     </div>
   </div>
@@ -1965,14 +1993,7 @@ function salvarOuAbrirPdf(doc, filename){
   return 'baixado';
 }
 
-function baixarPdfDia(dateStr){
-  const complexo = document.getElementById('fComplexo').value;
-  const site = document.getElementById('fSite').value;
-  const registros = checklistsDoDia(dateStr, complexo, site);
-  if (!registros.length){
-    toast("Não há checklists salvos nessa data para este Complexo/Site.");
-    return null;
-  }
+function baixarPdfComRegistros(registros, complexo, site, dateStr){
   const doc = montarPdfDoc(registros, complexo, site, dateStr);
   const filename = `Checklist_IQO_${site.replace(/[^\w]+/g,'_')}_${dateStr}.pdf`;
   const resultado = salvarOuAbrirPdf(doc, filename);
@@ -2038,21 +2059,7 @@ ${fiscais.join(', ') || 'Fiscalização do Contrato'}`;
   return { subject, body, temDesvios: desvios.length > 0 };
 }
 
-async function enviarEmailComPdf(dateStr){
-  const complexo = document.getElementById('fComplexo').value;
-  const site = document.getElementById('fSite').value;
-  const email = document.getElementById('fEmailContratada').value.trim();
-  const registros = checklistsDoDia(dateStr, complexo, site);
-
-  if (!registros.length){
-    toast("Não há checklists salvos nessa data para este site.");
-    return;
-  }
-  if (!email){
-    toast("Informe o e-mail da Contratada para este site, no campo do topo.");
-    return;
-  }
-
+async function enviarEmailComPdfRegistros(registros, complexo, site, dateStr, email){
   const doc = montarPdfDoc(registros, complexo, site, dateStr);
   const filename = `Checklist_IQO_${site.replace(/[^\w]+/g,'_')}_${dateStr}.pdf`;
   const { subject, body } = montarResumoEDesvios(registros, complexo, site, dateStr);
@@ -2082,96 +2089,89 @@ async function enviarEmailComPdf(dateStr){
     : `PDF "${filename}" baixado e e-mail aberto — anexe o arquivo a partir de Downloads.`);
 }
 
-document.getElementById('btnGerarPdfDia').addEventListener('click', ()=>{
-  const d = document.getElementById('pdfData').value || new Date().toISOString().slice(0,10);
-  baixarPdfDia(d);
-});
-document.getElementById('btnNotificarContratadaDia').addEventListener('click', ()=>{
-  const d = document.getElementById('pdfData').value || new Date().toISOString().slice(0,10);
-  enviarEmailComPdf(d);
-});
-document.getElementById('btnGerarPdfDesviosHoje').addEventListener('click', ()=>{
-  baixarPdfDia(new Date().toISOString().slice(0,10));
-});
-document.getElementById('btnNotificarContratadaHoje').addEventListener('click', ()=>{
-  enviarEmailComPdf(new Date().toISOString().slice(0,10));
-});
+/* ============================================================
+   SELEÇÃO DE PROCESSOS ANTES DO PDF/E-MAIL (quando há mais de 1
+   checklist na data, cada um pode ir para um responsável diferente)
+   ============================================================ */
+let pdfRegistrosParaSelecao = [];
+let pdfSelecaoContexto = null;
 
-document.getElementById('btnResumoDesviosAbertos').addEventListener('click', ()=>{
+function abrirSelecaoProcessosPdf(dateStr, acao){
   const complexo = document.getElementById('fComplexo').value;
   const site = document.getElementById('fSite').value;
-  const email = document.getElementById('fEmailContratada').value.trim();
+  const registros = checklistsDoDia(dateStr, complexo, site);
 
-  if (!email){
-    toast("Informe o e-mail da Contratada para este site, no campo do topo.");
+  if (!registros.length){
+    toast("Não há checklists salvos nessa data para este Complexo/Site.");
     return;
   }
 
-  const registros = loadChecklists().filter(c=>
-    c.complexo===complexo && c.site===site &&
-    c.itens.some(it=> (it.nota==='1'||it.nota==='2') && !it.tratado)
-  );
+  let email = '';
+  if (acao === 'email'){
+    email = document.getElementById('fEmailContratada').value.trim();
+    if (!email){ toast("Informe o e-mail da Contratada para este site, no campo do topo."); return; }
+  }
 
-  const desvios = [];
-  registros.forEach(c=>{
-    c.itens.forEach(it=>{
-      if ((it.nota==='1' || it.nota==='2') && !it.tratado){
-        const prazoTrat = addHorasUteis(c.data, c.hora, 8);
-        const vencido = new Date() > prazoTrat;
-        const marcador = vencido ? '🔴' : '🟡';
-        const avaliacao = it.nota==='1' ? 'Não atendido' : 'Parcial';
-        desvios.push(
-`${marcador} ${desvios.length+1}. [${formatDate(c.data)}] ${c.processoNome} — ${it.macro}
-   Nota ${it.nota} (${avaliacao}) · Prazo: ${fmtDateTime(prazoTrat)} (8h úteis)${it.obs? '\n   Obs.: '+it.obs : ''}`
-        );
-      }
-    });
-  });
-
-  if (!desvios.length){
-    toast("Não há desvios em aberto para este site. 🎉");
+  if (registros.length === 1){
+    executarAcaoPdf(acao, registros, complexo, site, dateStr, email);
     return;
   }
 
-  const subject = `Resumo de desvios em aberto — ${site} (${desvios.length})`;
-  const body =
-`Prezado(a) Preposto(a),
-
-RESUMO — Desvios em aberto | ${complexo} — ${site}
-------------------------------------
-${desvios.join('\n\n')}
-------------------------------------
-
-Pedimos a gentileza de regularizar o quanto antes, respeitando os prazos indicados, conforme o Anexo 02 (SLA) do contrato.
-
-Atenciosamente,`;
-
-  window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-});
-
-/* ============================================================
-   TOAST
-   ============================================================ */
-let toastTimer;
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+  pdfRegistrosParaSelecao = registros;
+  pdfSelecaoContexto = { acao, complexo, site, dateStr, email };
+  renderModalSelecaoProcessosPdf();
+  document.getElementById('processoPdfModalOverlay').classList.add('aberto');
 }
 
-/* ============================================================
-   BOOT
-   ============================================================ */
-initComplexoSelect();
-initProcessoPicker();
-initHistFilters();
-initEmailContratada();
-document.getElementById('pdfData').value = new Date().toISOString().slice(0,10);
-renderChecklistForm();
-renderHome();
-document.getElementById('mobileSaveBar').style.display = 'none';
-</script>
-</body>
-</html>
+function executarAcaoPdf(acao, registros, complexo, site, dateStr, email){
+  if (acao === 'baixar'){
+    baixarPdfComRegistros(registros, complexo, site, dateStr);
+  } else {
+    enviarEmailComPdfRegistros(registros, complexo, site, dateStr, email);
+  }
+}
+
+function renderModalSelecaoProcessosPdf(){
+  const body = document.getElementById('processoPdfModalBody');
+  body.innerHTML = pdfRegistrosParaSelecao.map((c, i)=>`
+    <div class="processo-pdf-item-row">
+      <input type="checkbox" class="processo-pdf-item-check" data-idx="${i}" checked>
+      <div class="processo-pdf-item-texto">
+        <b>${c.processoNome}</b>${c.rota? ' ('+c.rota+')' : ''}<br>
+        <span class="meta">${c.hora||''} · ${c.percentual!=null? c.percentual.toFixed(1)+'%':''} ${c.classificacao||''}</span>
+      </div>
+    </div>`
+  ).join('');
+
+  body.querySelectorAll('.processo-pdf-item-check').forEach(chk=>{
+    chk.addEventListener('change', atualizarContagemProcessosPdf);
+  });
+  atualizarContagemProcessosPdf();
+}
+
+function atualizarContagemProcessosPdf(){
+  const marcados = document.querySelectorAll('.processo-pdf-item-check:checked').length;
+  document.getElementById('processoPdfContagemSelecionados').textContent = `${marcados} selecionado(s)`;
+}
+
+document.getElementById('btnSelecionarTodosProcessosPdf').addEventListener('click', ()=>{
+  document.querySelectorAll('.processo-pdf-item-check').forEach(chk=>chk.checked = true);
+  atualizarContagemProcessosPdf();
+});
+document.getElementById('btnLimparSelecaoProcessosPdf').addEventListener('click', ()=>{
+  document.querySelectorAll('.processo-pdf-item-check').forEach(chk=>chk.checked = false);
+  atualizarContagemProcessosPdf();
+});
+document.getElementById('btnCancelarSelecaoProcessosPdf').addEventListener('click', ()=>{
+  document.getElementById('processoPdfModalOverlay').classList.remove('aberto');
+});
+document.getElementById('processoPdfModalOverlay').addEventListener('click', (e)=>{
+  if (e.target.id === 'processoPdfModalOverlay') e.target.classList.remove('aberto');
+});
+document.getElementById('btnConfirmarSelecaoProcessosPdf').addEventListener('click', ()=>{
+  const selecionados = Array.from(document.querySelectorAll('.processo-pdf-item-check:checked'))
+    .map(chk=>pdfRegistrosParaSelecao[parseInt(chk.dataset.idx, 10)]);
+
+  if (!selecionados.length){ toast("Selecione ao menos um processo."); return; }
+
+  document.getElementById('processoPdfModalOverlay').classList.remove('aberto');
