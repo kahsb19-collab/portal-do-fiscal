@@ -442,8 +442,8 @@ tr:hover td{background:#fafcfc;}
   <div class="desvio-modal-overlay" id="desvioModalOverlay">
     <div class="desvio-modal">
       <div class="desvio-modal-header">
-        <h3>Selecionar desvios para exportar</h3>
-        <p class="sub">Marque só os desvios que quer enviar agora — útil quando cada categoria tem um responsável diferente na contratada.</p>
+        <h3>Selecionar desvios para enviar</h3>
+        <p class="sub">Marque só os desvios que quer enviar agora — útil quando cada categoria tem um responsável diferente na contratada. Ao confirmar, o arquivo de desvios, o PDF e o e-mail de resumo são preparados automaticamente, só com os processos selecionados.</p>
         <div class="desvio-modal-acoes-globais">
           <button type="button" id="btnSelecionarTodosDesvios">Selecionar todos</button>
           <button type="button" id="btnLimparSelecaoDesvios">Limpar seleção</button>
@@ -453,7 +453,7 @@ tr:hover td{background:#fafcfc;}
       <div class="desvio-modal-footer">
         <span class="contagem-selecionados" id="desvioContagemSelecionados">0 selecionado(s)</span>
         <button class="btn ghost small" id="btnCancelarSelecaoDesvios">Cancelar</button>
-        <button class="btn gold small" id="btnConfirmarExportarDesvios">Exportar selecionados</button>
+        <button class="btn gold small" id="btnConfirmarExportarDesvios">Exportar + PDF + e-mail</button>
       </div>
     </div>
   </div>
@@ -598,7 +598,7 @@ tr:hover td{background:#fafcfc;}
       <div class="grid cols-2">
         <div>
           <b style="font-size:12.5px;color:var(--teal-900);">1. Enviar desvios para a contratada</b>
-          <p class="sub" style="margin:6px 0 10px;">Gera um arquivo com os desvios em aberto deste site. Mande junto com o arquivo "Formulário de Retorno da Contratada" para ela preencher.</p>
+          <p class="sub" style="margin:6px 0 10px;">Escolha os desvios em aberto deste site. Ao confirmar, o arquivo de desvios, o PDF do checklist e o e-mail de resumo são preparados juntos, já filtrados pelos processos selecionados — envie também o "Formulário de Retorno da Contratada" (link separado) para ela preencher.</p>
           <button class="btn gold small" id="btnExportarDesviosPendentes">Exportar desvios pendentes</button>
         </div>
         <div>
@@ -1507,25 +1507,67 @@ function coletarPendentes(complexo, site){
   return pendentes;
 }
 
-async function exportarDesvios(desvios, complexo, site){
-  const payload = JSON.stringify({ tipo: "sla_iqo_desvios_pendentes", complexo, site, exportadoEm: new Date().toISOString(), desvios }, null, 2);
-  const filename = `Desvios_Pendentes_${site.replace(/[^\w]+/g,'_')}_${new Date().toISOString().slice(0,10)}.json`;
-  const blob = new Blob([payload], { type: "application/json" });
+async function exportarDesviosComPdfEEmail(desvios, complexo, site){
+  // 1) monta o JSON de desvios selecionados (para o Formulário de Retorno da Contratada preencher)
+  const payloadDesvios = JSON.stringify({ tipo: "sla_iqo_desvios_pendentes", complexo, site, exportadoEm: new Date().toISOString(), desvios }, null, 2);
+  const sufixoArquivo = `${site.replace(/[^\w]+/g,'_')}_${new Date().toISOString().slice(0,10)}`;
+  const filenameJson = `Desvios_Pendentes_${sufixoArquivo}.json`;
+  const blobJson = new Blob([payloadDesvios], { type: "application/json" });
 
+  // 2) identifica os checklists (processos) por tras dos desvios selecionados,
+  //    e monta o PDF e o resumo do e-mail so com esses processos
+  const idsSelecionados = new Set(desvios.map(d=>d.checklistId));
+  const registrosSelecionados = loadChecklists().filter(c=>idsSelecionados.has(c.id));
+
+  let blobPdf = null, filenamePdf = null, resumo = null;
+  if (registrosSelecionados.length){
+    const datas = registrosSelecionados.map(c=>c.data).sort();
+    const dateStrPdf = datas[datas.length - 1]; // data mais recente entre os processos selecionados
+    const doc = montarPdfDoc(registrosSelecionados, complexo, site, dateStrPdf);
+    filenamePdf = `Checklist_IQO_${site.replace(/[^\w]+/g,'_')}_${dateStrPdf}.pdf`;
+    blobPdf = doc.output('blob');
+    resumo = montarResumoEDesvios(registrosSelecionados, complexo, site, dateStrPdf);
+  }
+
+  const email = document.getElementById('fEmailContratada').value.trim();
+
+  // 3) tenta compartilhar o JSON e o PDF juntos numa unica acao, com o resumo como texto
   try{
-    const file = new File([blob], filename, { type: "application/json" });
-    if (navigator.canShare && navigator.canShare({ files: [file] })){
-      await navigator.share({ files: [file], title: "Desvios pendentes", text: `Desvios em aberto de ${site} para tratativa.` });
-      toast("Arquivo compartilhado com a contratada.");
+    const files = [ new File([blobJson], filenameJson, { type: "application/json" }) ];
+    if (blobPdf) files.push(new File([blobPdf], filenamePdf, { type: "application/pdf" }));
+    if (navigator.canShare && navigator.canShare({ files })){
+      await navigator.share({
+        files,
+        title: resumo ? resumo.subject : "Desvios pendentes",
+        text: resumo ? resumo.body : `Desvios em aberto de ${site} para tratativa.`
+      });
+      toast("Desvios e PDF compartilhados — escolha o e-mail e confirme o envio.");
       return;
     }
-  }catch(err){ /* segue para download */ }
+  }catch(err){
+    if (err && err.name === 'AbortError') return;
+  }
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-  toast("Arquivo baixado — envie para a contratada junto com o Formulário de Retorno.");
+  // 4) fallback: baixa o JSON e o PDF, e abre o e-mail com o resumo (se o e-mail estiver preenchido)
+  const urlJson = URL.createObjectURL(blobJson);
+  const aJson = document.createElement('a');
+  aJson.href = urlJson; aJson.download = filenameJson; aJson.click();
+  URL.revokeObjectURL(urlJson);
+
+  if (blobPdf){
+    const urlPdf = URL.createObjectURL(blobPdf);
+    const aPdf = document.createElement('a');
+    aPdf.href = urlPdf; aPdf.download = filenamePdf; aPdf.click();
+    URL.revokeObjectURL(urlPdf);
+  }
+
+  if (email && resumo){
+    const mailtoUrl = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(resumo.subject)}&body=${encodeURIComponent(resumo.body)}`;
+    window.location.href = mailtoUrl;
+    toast("Desvios e PDF baixados, e-mail aberto com o resumo — anexe os dois arquivos a partir de Downloads.");
+  } else {
+    toast(`Desvios${blobPdf? ' e PDF' : ''} baixados — envie para a contratada junto com o Formulário de Retorno.${email? '' : ' Preencha o e-mail da Contratada, no topo, para preparar o envio automaticamente da próxima vez.'}`);
+  }
 }
 
 let pendentesParaSelecao = [];
@@ -1635,7 +1677,7 @@ document.getElementById('btnConfirmarExportarDesvios').addEventListener('click',
   const complexo = document.getElementById('fComplexo').value;
   const site = document.getElementById('fSite').value;
   document.getElementById('desvioModalOverlay').classList.remove('aberto');
-  await exportarDesvios(selecionados, complexo, site);
+  await exportarDesviosComPdfEEmail(selecionados, complexo, site);
 });
 
 document.getElementById('inputImportarRetorno').addEventListener('change', (e)=>{
@@ -2231,45 +2273,3 @@ document.getElementById('btnResumoDesviosAbertos').addEventListener('click', ()=
     return;
   }
 
-  const subject = `Resumo de desvios em aberto — ${site} (${desvios.length})`;
-  const body =
-`Prezado(a) Preposto(a),
-
-RESUMO — Desvios em aberto | ${complexo} — ${site}
-------------------------------------
-${desvios.join('\n\n')}
-------------------------------------
-
-Pedimos a gentileza de regularizar o quanto antes, respeitando os prazos indicados, conforme o Anexo 02 (SLA) do contrato.
-
-Atenciosamente,`;
-
-  window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-});
-
-/* ============================================================
-   TOAST
-   ============================================================ */
-let toastTimer;
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
-}
-
-/* ============================================================
-   BOOT
-   ============================================================ */
-initComplexoSelect();
-initProcessoPicker();
-initHistFilters();
-initEmailContratada();
-document.getElementById('pdfData').value = new Date().toISOString().slice(0,10);
-renderChecklistForm();
-renderHome();
-document.getElementById('mobileSaveBar').style.display = 'none';
-</script>
-</body>
-</html>
