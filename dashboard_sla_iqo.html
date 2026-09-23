@@ -2175,3 +2175,101 @@ document.getElementById('btnConfirmarSelecaoProcessosPdf').addEventListener('cli
   if (!selecionados.length){ toast("Selecione ao menos um processo."); return; }
 
   document.getElementById('processoPdfModalOverlay').classList.remove('aberto');
+  const { acao, complexo, site, dateStr, email } = pdfSelecaoContexto;
+  executarAcaoPdf(acao, selecionados, complexo, site, dateStr, email);
+});
+
+document.getElementById('btnGerarPdfDia').addEventListener('click', ()=>{
+  const d = document.getElementById('pdfData').value || new Date().toISOString().slice(0,10);
+  abrirSelecaoProcessosPdf(d, 'baixar');
+});
+document.getElementById('btnNotificarContratadaDia').addEventListener('click', ()=>{
+  const d = document.getElementById('pdfData').value || new Date().toISOString().slice(0,10);
+  abrirSelecaoProcessosPdf(d, 'email');
+});
+document.getElementById('btnGerarPdfDesviosHoje').addEventListener('click', ()=>{
+  abrirSelecaoProcessosPdf(new Date().toISOString().slice(0,10), 'baixar');
+});
+document.getElementById('btnNotificarContratadaHoje').addEventListener('click', ()=>{
+  abrirSelecaoProcessosPdf(new Date().toISOString().slice(0,10), 'email');
+});
+
+
+document.getElementById('btnResumoDesviosAbertos').addEventListener('click', ()=>{
+  const complexo = document.getElementById('fComplexo').value;
+  const site = document.getElementById('fSite').value;
+  const email = document.getElementById('fEmailContratada').value.trim();
+
+  if (!email){
+    toast("Informe o e-mail da Contratada para este site, no campo do topo.");
+    return;
+  }
+
+  const registros = loadChecklists().filter(c=>
+    c.complexo===complexo && c.site===site &&
+    c.itens.some(it=> (it.nota==='1'||it.nota==='2') && !it.tratado)
+  );
+
+  const desvios = [];
+  registros.forEach(c=>{
+    c.itens.forEach(it=>{
+      if ((it.nota==='1' || it.nota==='2') && !it.tratado){
+        const prazoTrat = addHorasUteis(c.data, c.hora, 8);
+        const vencido = new Date() > prazoTrat;
+        const marcador = vencido ? '🔴' : '🟡';
+        const avaliacao = it.nota==='1' ? 'Não atendido' : 'Parcial';
+        desvios.push(
+`${marcador} ${desvios.length+1}. [${formatDate(c.data)}] ${c.processoNome} — ${it.macro}
+   Nota ${it.nota} (${avaliacao}) · Prazo: ${fmtDateTime(prazoTrat)} (8h úteis)${it.obs? '\n   Obs.: '+it.obs : ''}`
+        );
+      }
+    });
+  });
+
+  if (!desvios.length){
+    toast("Não há desvios em aberto para este site. 🎉");
+    return;
+  }
+
+  const subject = `Resumo de desvios em aberto — ${site} (${desvios.length})`;
+  const body =
+`Prezado(a) Preposto(a),
+
+RESUMO — Desvios em aberto | ${complexo} — ${site}
+------------------------------------
+${desvios.join('\n\n')}
+------------------------------------
+
+Pedimos a gentileza de regularizar o quanto antes, respeitando os prazos indicados, conforme o Anexo 02 (SLA) do contrato.
+
+Atenciosamente,`;
+
+  window.location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+});
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+initComplexoSelect();
+initProcessoPicker();
+initHistFilters();
+initEmailContratada();
+document.getElementById('pdfData').value = new Date().toISOString().slice(0,10);
+renderChecklistForm();
+renderHome();
+document.getElementById('mobileSaveBar').style.display = 'none';
+</script>
+</body>
+</html>
