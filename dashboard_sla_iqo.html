@@ -3,15 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="shortcut icon" href="favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#007c7a">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Portal do Fiscal — Fiscalização na Palma da Mão</title>
 <style>
 :root{
@@ -186,6 +177,57 @@ tr:hover td{background:#fafcfc;}
   transition:.25s;pointer-events:none;z-index:50;
 }
 .toast.show{opacity:1;transform:translateY(0);}
+
+/* Modal de selecao de desvios para exportar */
+.desvio-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,20,25,.5);z-index:60;
+  display:none;align-items:flex-end;justify-content:center;
+}
+.desvio-modal-overlay.aberto{display:flex;}
+.desvio-modal{
+  background:#fff;width:100%;max-width:640px;max-height:88vh;
+  border-radius:18px 18px 0 0;display:flex;flex-direction:column;
+  box-shadow:0 -10px 30px rgba(0,0,0,.25);
+}
+@media(min-width:680px){
+  .desvio-modal-overlay{align-items:center;}
+  .desvio-modal{border-radius:16px;max-height:82vh;}
+}
+.desvio-modal-header{
+  padding:16px 18px 12px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.desvio-modal-header h3{margin:0 0 4px;font-size:16px;color:var(--teal-900);}
+.desvio-modal-header .sub{margin:0;}
+.desvio-modal-acoes-globais{display:flex;gap:14px;margin-top:10px;}
+.desvio-modal-acoes-globais button{
+  background:none;border:none;padding:0;font-size:12px;font-weight:700;color:var(--vale-oficial);cursor:pointer;
+}
+.desvio-modal-body{padding:8px 18px;overflow-y:auto;flex:1;}
+.desvio-grupo{margin:14px 0;}
+.desvio-grupo-header{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--teal-100);
+  border-radius:8px;margin-bottom:6px;cursor:pointer;
+}
+.desvio-grupo-header b{font-size:12.5px;color:var(--teal-900);flex:1;}
+.desvio-grupo-header .contagem{font-size:11px;color:var(--muted);font-weight:600;}
+.desvio-item-row{
+  display:flex;gap:10px;padding:9px 10px 9px 26px;border-bottom:1px solid var(--border);
+}
+.desvio-item-row:last-child{border-bottom:none;}
+.desvio-item-row input[type=checkbox]{margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--vale-oficial);}
+.desvio-item-texto{font-size:12.5px;line-height:1.4;}
+.desvio-item-texto .macro{font-weight:700;color:var(--teal-900);}
+.desvio-item-texto .nota-badge{
+  display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px;
+}
+.desvio-item-texto .nota-badge.n1{background:var(--bad-bg);color:var(--bad);}
+.desvio-item-texto .nota-badge.n2{background:var(--warn-bg);color:var(--warn);}
+.desvio-modal-footer{
+  padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0;
+  display:flex;gap:10px;align-items:center;
+}
+.desvio-modal-footer .contagem-selecionados{font-size:12.5px;color:var(--muted);flex:1;}
+
 .filters-row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px;}
 .filters-row .field{margin-bottom:0;min-width:160px;}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
@@ -387,6 +429,25 @@ tr:hover td{background:#fafcfc;}
       </div>
     </div>
   </section>
+
+  <div class="desvio-modal-overlay" id="desvioModalOverlay">
+    <div class="desvio-modal">
+      <div class="desvio-modal-header">
+        <h3>Selecionar desvios para exportar</h3>
+        <p class="sub">Marque só os desvios que quer enviar agora — útil quando cada categoria tem um responsável diferente na contratada.</p>
+        <div class="desvio-modal-acoes-globais">
+          <button type="button" id="btnSelecionarTodosDesvios">Selecionar todos</button>
+          <button type="button" id="btnLimparSelecaoDesvios">Limpar seleção</button>
+        </div>
+      </div>
+      <div class="desvio-modal-body" id="desvioModalBody"></div>
+      <div class="desvio-modal-footer">
+        <span class="contagem-selecionados" id="desvioContagemSelecionados">0 selecionado(s)</span>
+        <button class="btn ghost small" id="btnCancelarSelecaoDesvios">Cancelar</button>
+        <button class="btn gold small" id="btnConfirmarExportarDesvios">Exportar selecionados</button>
+      </div>
+    </div>
+  </div>
 
   <div class="mobile-save-bar" id="mobileSaveBar">
     <button class="btn gold" id="btnSalvarChecklistMobile">Salvar checklist</button>
@@ -1393,11 +1454,8 @@ function renderDesvios(){
 /* ============================================================
    DOCUMENTO DE RETORNO DA CONTRATADA — exportar / importar
    ============================================================ */
-document.getElementById('btnExportarDesviosPendentes').addEventListener('click', async ()=>{
-  const complexo = document.getElementById('fComplexo').value;
-  const site = document.getElementById('fSite').value;
+function coletarPendentes(complexo, site){
   const arr = loadChecklists().filter(c=>c.complexo===complexo && c.site===site);
-
   const pendentes = [];
   arr.forEach(c=>{
     c.itens.forEach((it, idx)=>{
@@ -1418,10 +1476,11 @@ document.getElementById('btnExportarDesviosPendentes').addEventListener('click',
       }
     });
   });
+  return pendentes;
+}
 
-  if (!pendentes.length){ toast("Não há desvios pendentes para este site."); return; }
-
-  const payload = JSON.stringify({ tipo: "sla_iqo_desvios_pendentes", complexo, site, exportadoEm: new Date().toISOString(), desvios: pendentes }, null, 2);
+async function exportarDesvios(desvios, complexo, site){
+  const payload = JSON.stringify({ tipo: "sla_iqo_desvios_pendentes", complexo, site, exportadoEm: new Date().toISOString(), desvios }, null, 2);
   const filename = `Desvios_Pendentes_${site.replace(/[^\w]+/g,'_')}_${new Date().toISOString().slice(0,10)}.json`;
   const blob = new Blob([payload], { type: "application/json" });
 
@@ -1439,6 +1498,116 @@ document.getElementById('btnExportarDesviosPendentes').addEventListener('click',
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
   toast("Arquivo baixado — envie para a contratada junto com o Formulário de Retorno.");
+}
+
+let pendentesParaSelecao = [];
+
+document.getElementById('btnExportarDesviosPendentes').addEventListener('click', ()=>{
+  const complexo = document.getElementById('fComplexo').value;
+  const site = document.getElementById('fSite').value;
+  pendentesParaSelecao = coletarPendentes(complexo, site);
+
+  if (!pendentesParaSelecao.length){ toast("Não há desvios pendentes para este site."); return; }
+
+  renderModalSelecaoDesvios();
+  document.getElementById('desvioModalOverlay').classList.add('aberto');
+});
+
+function renderModalSelecaoDesvios(){
+  const body = document.getElementById('desvioModalBody');
+  const grupos = {};
+  pendentesParaSelecao.forEach((d, i)=>{
+    const chave = d.processoNome || 'Outros';
+    if (!grupos[chave]) grupos[chave] = [];
+    grupos[chave].push(i);
+  });
+
+  body.innerHTML = Object.keys(grupos).map(nomeGrupo=>{
+    const indices = grupos[nomeGrupo];
+    const itensHtml = indices.map(i=>{
+      const d = pendentesParaSelecao[i];
+      const notaClasse = d.nota === '1' ? 'n1' : 'n2';
+      const notaLabel = d.nota === '1' ? '1 - Não atendido' : '2 - Parcial';
+      return `
+        <div class="desvio-item-row">
+          <input type="checkbox" class="desvio-item-check" data-idx="${i}" checked>
+          <div class="desvio-item-texto">
+            <span class="macro">${d.macro}</span><span class="nota-badge ${notaClasse}">${notaLabel}</span><br>
+            ${d.item}
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="desvio-grupo" data-grupo="${nomeGrupo}">
+        <div class="desvio-grupo-header">
+          <input type="checkbox" class="desvio-grupo-check" data-grupo="${nomeGrupo}" checked>
+          <b>${nomeGrupo}</b>
+          <span class="contagem">${indices.length} desvio(s)</span>
+        </div>
+        ${itensHtml}
+      </div>`;
+  }).join('');
+
+  body.querySelectorAll('.desvio-item-check').forEach(chk=>{
+    chk.addEventListener('change', atualizarContagemESelecaoGrupos);
+  });
+  body.querySelectorAll('.desvio-grupo-check').forEach(chk=>{
+    chk.addEventListener('change', (e)=>{
+      const grupo = e.target.dataset.grupo;
+      body.querySelectorAll(`.desvio-item-row input[data-idx]`).forEach(itemChk=>{
+        const i = parseInt(itemChk.dataset.idx, 10);
+        if ((pendentesParaSelecao[i].processoNome || 'Outros') === grupo){
+          itemChk.checked = e.target.checked;
+        }
+      });
+      atualizarContagemSelecionados();
+    });
+  });
+
+  atualizarContagemSelecionados();
+}
+
+function atualizarContagemESelecaoGrupos(){
+  const body = document.getElementById('desvioModalBody');
+  body.querySelectorAll('.desvio-grupo').forEach(grupoEl=>{
+    const nomeGrupo = grupoEl.dataset.grupo;
+    const itens = Array.from(grupoEl.querySelectorAll('.desvio-item-check'));
+    const todosMarcados = itens.every(chk=>chk.checked);
+    const grupoCheck = grupoEl.querySelector('.desvio-grupo-check');
+    grupoCheck.checked = todosMarcados;
+  });
+  atualizarContagemSelecionados();
+}
+
+function atualizarContagemSelecionados(){
+  const marcados = document.querySelectorAll('.desvio-item-check:checked').length;
+  document.getElementById('desvioContagemSelecionados').textContent = `${marcados} selecionado(s)`;
+}
+
+document.getElementById('btnSelecionarTodosDesvios').addEventListener('click', ()=>{
+  document.querySelectorAll('.desvio-item-check, .desvio-grupo-check').forEach(chk=>chk.checked = true);
+  atualizarContagemSelecionados();
+});
+document.getElementById('btnLimparSelecaoDesvios').addEventListener('click', ()=>{
+  document.querySelectorAll('.desvio-item-check, .desvio-grupo-check').forEach(chk=>chk.checked = false);
+  atualizarContagemSelecionados();
+});
+document.getElementById('btnCancelarSelecaoDesvios').addEventListener('click', ()=>{
+  document.getElementById('desvioModalOverlay').classList.remove('aberto');
+});
+document.getElementById('desvioModalOverlay').addEventListener('click', (e)=>{
+  if (e.target.id === 'desvioModalOverlay') e.target.classList.remove('aberto');
+});
+document.getElementById('btnConfirmarExportarDesvios').addEventListener('click', async ()=>{
+  const selecionados = Array.from(document.querySelectorAll('.desvio-item-check:checked'))
+    .map(chk=>pendentesParaSelecao[parseInt(chk.dataset.idx, 10)]);
+
+  if (!selecionados.length){ toast("Selecione ao menos um desvio."); return; }
+
+  const complexo = document.getElementById('fComplexo').value;
+  const site = document.getElementById('fSite').value;
+  document.getElementById('desvioModalOverlay').classList.remove('aberto');
+  await exportarDesvios(selecionados, complexo, site);
 });
 
 document.getElementById('inputImportarRetorno').addEventListener('change', (e)=>{
