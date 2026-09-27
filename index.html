@@ -12,6 +12,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Portal do Fiscal</title>
 <style>
 :root{
@@ -126,6 +129,7 @@ body{
   transition:transform .12s ease, background-color .15s ease;
 }
 .menu-card:active{transform:scale(0.97);background:rgba(255,255,255,.14);}
+a.menu-card{text-decoration:none;}
 .menu-card .card-icon{
   width:46px;height:46px;border-radius:13px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;font-size:21px;
@@ -351,6 +355,14 @@ body{
       </div>
       <span class="card-chevron">›</span>
     </button>
+    <a class="menu-card book" href="book_fiscalizacao.html">
+      <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path stroke="#FFC72C" d="M12 7c-.7-.7-1.6-1-3.5-1H5.5C4.7 6 4 6.7 4 7.5V11"/><path stroke="#00786F" d="M4 11v6.5C4 18.3 4.7 19 5.5 19H8c1.4 0 2.3.3 3 1"/><path stroke="#FFC72C" d="M12 7c.7-.7 1.6-1 3.5-1h3c.8 0 1.5.7 1.5 1.5V11"/><path stroke="#00786F" d="M20 11v6.5c0 .8-.7 1.5-1.5 1.5H16c-1.4 0-2.3.3-3 1"/><path stroke="#00786F" d="M12 7v13"/></svg></div>
+      <div class="card-text">
+        <div class="card-title">Book de Fiscalização</div>
+        <div class="card-desc">Guia Operacional, Diário de Bordo e Matriz RASCI para consulta.</div>
+      </div>
+      <span class="card-chevron">›</span>
+    </a>
   </div>
 </div>
 
